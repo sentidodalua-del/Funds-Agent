@@ -104,6 +104,11 @@ async def debug():
     import os
     import httpx
     results = {}
+
+    # Show ALL environment variables (names only for security)
+    all_env_keys = list(os.environ.keys())
+    results["all_env_keys"] = all_env_keys
+    results["env_count"] = len(all_env_keys)
     
     # Check env vars
     pplx_key = os.environ.get("PERPLEXITY_API_KEY", "")
