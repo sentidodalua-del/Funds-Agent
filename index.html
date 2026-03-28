@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funds Agent — Glamping Skies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --surface: #111419;
+    --surface2: #181c23;
+    --border: #1e2530;
+    --border2: #252d3a;
+    --gold: #c9a84c;
+    --gold-dim: #8a6f30;
+    --gold-glow: rgba(201,168,76,0.12);
+    --green: #2ecc87;
+    --green-dim: #1a7a50;
+    --amber: #e8a838;
+    --red: #e85538;
+    --text: #e8edf5;
+    --text2: #8b95a8;
+    --text3: #4d5668;
+    --accent: #3d7fff;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtle background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(201,168,76,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(61,127,255,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,12,15,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .brand-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .brand-text span {
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .last-search {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .btn-search {
+    background: var(--gold);
+    color: #0a0c0f;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.2s;
+  }
+
+  .btn-search:hover { background: #d4b05a; transform: translateY(-1px); }
+  .btn-search:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-search .spinner {
+    width: 12px; height: 12px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* LAYOUT */
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 32px;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+    min-height: calc(100vh - 64px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* STATS CARDS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    transition: border-color 0.2s;
+  }
+
+  .stat-card:hover { border-color: var(--border2); }
+
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+  }
+
+  /* FILTERS */
+  .filter-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .filter-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .filter-group {
+    margin-bottom: 16px;
+  }
+
+  .filter-group-label {
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .chip:hover { border-color: var(--gold-dim); color: var(--gold); }
+  .chip.active { background: var(--gold-glow); border-color: var(--gold-dim); color: var(--gold); }
+
+  /* PROFILE CARD */
+  .profile-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .profile-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .profile-meta {
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.6;
+  }
+
+  .profile-tag {
+    display: inline-block;
+    background: var(--gold-glow);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-top: 8px;
+    margin-right: 4px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  /* MAIN CONTENT */
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* SEARCH BAR */
+  .search-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .search-bar input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+  }
+
+  .search-bar input::placeholder { color: var(--text3); }
+
+  /* OPPORTUNITIES LIST */
+  .opportunities-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--text);
+  }
+
+  .count-badge {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* OPPORTUNITY CARD */
+  .opp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .opp-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--border2);
+    transition: background 0.2s;
+  }
+
+  .opp-card.relevance-Alta::before { background: var(--green); }
+  .opp-card.relevance-Média::before { background: var(--amber); }
+  .opp-card.relevance-Baixa::before { background: var(--text3); }
+
+  .opp-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .opp-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .opp-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .opp-badges {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .badge-relevance-Alta { background: rgba(46,204,135,0.15); color: var(--green); }
+  .badge-relevance-Média { background: rgba(232,168,56,0.15); color: var(--amber); }
+  .badge-relevance-Baixa { background: rgba(77,86,104,0.15); color: var(--text3); }
+  .badge-urgency-Alta { background: rgba(232,85,56,0.15); color: var(--red); }
+  .badge-urgency-Média { background: rgba(232,168,56,0.12); color: var(--amber); }
+  .badge-urgency-Baixa { background: rgba(61,127,255,0.12); color: var(--accent); }
+
+  .opp-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+
+  .opp-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .opp-meta-item strong { color: var(--text); font-weight: 500; }
+
+  .opp-summary {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .opp-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .opp-program {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .opp-funding {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--gold);
+  }
+
+  .opp-funding span {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px;
+    overflow-y: auto;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 860px;
+    margin: auto;
+    overflow: hidden;
+    animation: modalIn 0.25s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .modal-header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .modal-body {
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .modal-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .modal-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .info-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .info-item-label {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+
+  .info-item-value {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .info-item-value.highlight {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--gold);
+  }
+
+  .text-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  /* Budget table */
+  .budget-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .budget-table th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text3);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+
+  .budget-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text2);
+    vertical-align: top;
+  }
+
+  .budget-table tr:last-child td { border-bottom: none; }
+
+  .budget-table td:last-child {
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .budget-total {
+    background: var(--gold-glow);
+    border: 1px solid var(--gold-dim);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+  }
+
+  .budget-total-label { font-size: 12px; color: var(--text2); font-weight: 500; }
+  
+  .budget-total-numbers {
+    text-align: right;
+  }
+
+  .budget-total-main {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--gold);
+  }
+
+  .budget-total-sub {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  /* Next steps */
+  .steps-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .steps-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .step-num {
+    width: 20px;
+    height: 20px;
+    background: var(--gold-glow);
+    border: 1px solid var(--gold-dim);
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .modal-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    font-size: 13px;
+    text-decoration: none;
+    padding: 8px 14px;
+    border: 1px solid rgba(61,127,255,0.3);
+    border-radius: 6px;
+    transition: all 0.15s;
+  }
+
+  .modal-link:hover { background: rgba(61,127,255,0.1); border-color: var(--accent); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 80px 32px;
+    color: var(--text3);
+  }
+
+  .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+
+  .empty-state h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+
+  .empty-state p { font-size: 13px; line-height: 1.6; }
+
+  /* LOADING */
+  .loading-state {
+    text-align: center;
+    padding: 60px;
+    color: var(--text3);
+  }
+
+  .loading-dots {
+    display: inline-flex;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .loading-dots span {
+    width: 8px; height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: bounce 1.2s ease infinite;
+  }
+
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Score bar */
+  .score-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .score-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    transition: width 0.8s ease;
+  }
+
+  @media (max-width: 900px) {
+    .container { grid-template-columns: 1fr; padding: 16px; }
+    .info-grid { grid-template-columns: 1fr 1fr; }
+    .modal-body { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="brand-icon">🏕</div>
+    <div class="brand-text">
+      <h1>Funds Agent</h1>
+      <span>Glamping Skies · Alentejo</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span class="last-search" id="lastSearch">A carregar...</span>
+    <button class="btn-search" id="btnSearch" onclick="triggerSearch()">
+      <span class="spinner" id="spinner"></span>
+      <span id="btnLabel">🔍 Pesquisar Agora</span>
+    </button>
+  </div>
+</header>
+
+<div class="container">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="statTotal">—</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statHigh" style="color: var(--green)">—</div>
+        <div class="stat-label">Alta relevância</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statMedium" style="color: var(--amber)">—</div>
+        <div class="stat-label">Média</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statToday">—</div>
+        <div class="stat-label">Hoje</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-panel">
+      <div class="filter-title">Filtros</div>
+      <div class="filter-group">
+        <div class="filter-group-label">Relevância</div>
+        <div class="filter-chips">
+          <button class="chip active" onclick="setFilter('relevance', null, this)">Todos</button>
+          <button class="chip" onclick="setFilter('relevance', 'Alta', this)">Alta</button>
+          <button class="chip" onclick="setFilter('relevance', 'Média', this)">Média</button>
+          <button class="chip" onclick="setFilter('relevance', 'Baixa', this)">Baixa</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-group-label">Área</div>
+        <div class="filter-chips">
+          <button class="chip active" onclick="setFilter('area', null, this)">Todas</button>
+          <button class="chip" onclick="setFilter('area', 'Digitalização', this)">Digital</button>
+          <button class="chip" onclick="setFilter('area', 'Marketing', this)">Marketing</button>
+          <button class="chip" onclick="setFilter('area', 'Internacionalização', this)">Internac.</button>
+          <button class="chip" onclick="setFilter('area', 'IA', this)">IA</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile -->
+    <div class="profile-card">
+      <div class="filter-title">Perfil da Empresa</div>
+      <div class="profile-name">Glamping Skies</div>
+      <div class="profile-meta">
+        Turismo Rural · Estremoz, Alentejo<br>
+        Microempresa · CAE 55202<br>
+        Território de Baixa Densidade
+      </div>
+      <div>
+        <span class="profile-tag">Digitalização</span>
+        <span class="profile-tag">Marketing Digital</span>
+        <span class="profile-tag">Internacionalização</span>
+        <span class="profile-tag">IA & Automação</span>
+        <span class="profile-tag">Fundo Perdido</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="search-bar">
+      <span style="color: var(--text3)">🔎</span>
+      <input type="text" placeholder="Pesquisar concursos..." id="searchInput" oninput="filterLocal()">
+    </div>
+
+    <div class="opportunities-header">
+      <div class="section-title">Oportunidades de Financiamento</div>
+      <div class="count-badge" id="countBadge">0 concursos</div>
+    </div>
+
+    <div id="opportunitiesList"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle"></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+let allOpportunities = [];
+let filters = { relevance: null, area: null };
+
+async function loadStats() {
+  try {
+    const r = await fetch('/api/stats');
+    const s = await r.json();
+    document.getElementById('statTotal').textContent = s.total || 0;
+    document.getElementById('statHigh').textContent = s.high_relevance || 0;
+    document.getElementById('statMedium').textContent = s.medium_relevance || 0;
+    document.getElementById('statToday').textContent = s.found_today || 0;
+    if (s.last_search) {
+      const d = new Date(s.last_search);
+      document.getElementById('lastSearch').textContent = 
+        'Última pesquisa: ' + d.toLocaleDateString('pt-PT') + ' ' + d.toLocaleTimeString('pt-PT', {hour:'2-digit',minute:'2-digit'});
+    } else {
+      document.getElementById('lastSearch').textContent = 'Sem pesquisa anterior';
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function loadOpportunities() {
+  const list = document.getElementById('opportunitiesList');
+  list.innerHTML = `<div class="loading-state">
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+    <div>A carregar oportunidades...</div>
+  </div>`;
+
+  try {
+    let url = '/api/opportunities?';
+    if (filters.relevance) url += `relevance=${filters.relevance}&`;
+    if (filters.area) url += `area=${filters.area}&`;
+    const r = await fetch(url);
+    allOpportunities = await r.json();
+    renderOpportunities(allOpportunities);
+  } catch(e) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">⚠️</div>
+      <h3>Erro ao carregar</h3>
+      <p>Não foi possível ligar ao servidor.</p>
+    </div>`;
+  }
+}
+
+function renderOpportunities(opps) {
+  const list = document.getElementById('opportunitiesList');
+  const count = document.getElementById('countBadge');
+  count.textContent = `${opps.length} concurso${opps.length !== 1 ? 's' : ''}`;
+
+  if (!opps.length) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">🔍</div>
+      <h3>Nenhuma oportunidade encontrada</h3>
+      <p>Clica em "Pesquisar Agora" para o agente pesquisar concursos abertos adequados ao teu perfil.</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = opps.map(o => {
+    const budget = parseBudget(o.proposed_budget);
+    const supportAmount = budget ? formatEur(budget.support_amount) : '—';
+    return `
+    <div class="opp-card relevance-${o.relevance_label}" onclick="openModal(${o.id})" style="margin-bottom:12px">
+      <div class="opp-card-header">
+        <div class="opp-title">${o.title || 'Sem título'}</div>
+        <div class="opp-badges">
+          <span class="badge badge-relevance-${o.relevance_label}">${o.relevance_label || '—'}</span>
+          ${o.urgency ? `<span class="badge badge-urgency-${o.urgency}">⏱ ${o.urgency}</span>` : ''}
+        </div>
+      </div>
+      <div class="opp-meta">
+        ${o.deadline ? `<div class="opp-meta-item">📅 <strong>${o.deadline}</strong></div>` : ''}
+        ${o.support_rate ? `<div class="opp-meta-item">💶 <strong>${o.support_rate}</strong></div>` : ''}
+        ${o.area ? `<div class="opp-meta-item">🏷 <strong>${o.area}</strong></div>` : ''}
+        ${o.investment_profile === 'A' ? '<div class="opp-meta-item">🔵 <strong>Intangíveis · Sentido da Lua</strong></div>' : ''}
+        ${o.investment_profile === 'B' ? '<div class="opp-meta-item">🟢 <strong>Físico · Empreiteiro externo</strong></div>' : ''}
+        ${o.investment_profile === 'AB' ? '<div class="opp-meta-item">🟡 <strong>Misto · Estratégia dupla</strong></div>' : ''}
+      </div>
+      ${o.eligibility_analysis ? `<div class="opp-summary">${o.eligibility_analysis}</div>` : ''}
+      <div class="opp-footer">
+        <div class="opp-program">${o.program || ''} · ${o.managing_entity || ''}</div>
+        <div class="opp-funding">${supportAmount} <span>apoio estimado</span></div>
+      </div>
+      <div class="score-bar"><div class="score-fill" style="width:${o.relevance_score || 0}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function parseBudget(raw) {
+  if (!raw) return null;
+  try {
+    return typeof raw === 'string' ? JSON.parse(raw) : raw;
+  } catch(e) { return null; }
+}
+
+function formatEur(val) {
+  if (!val) return '—';
+  return '€' + Number(val).toLocaleString('pt-PT');
+}
+
+async function openModal(id) {
+  const opp = allOpportunities.find(o => o.id === id);
+  if (!opp) return;
+  
+  const overlay = document.getElementById('modalOverlay');
+  document.getElementById('modalTitle').textContent = opp.title;
+  
+  const budget = parseBudget(opp.proposed_budget);
+  const steps = opp.next_steps ? opp.next_steps.split('\n').filter(s => s.trim()) : [];
+
+  let budgetHtml = '';
+  if (budget && budget.components) {
+    budgetHtml = `
+      <table class="budget-table">
+        <thead>
+          <tr>
+            <th>Componente</th>
+            <th>Descrição</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${budget.components.map(c => `
+            <tr>
+              <td style="color:var(--text);font-weight:500;white-space:nowrap">${c.name}</td>
+              <td>${c.description || ''}</td>
+              <td>${formatEur(c.value)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      <div class="budget-total">
+        <div>
+          <div class="budget-total-label">Investimento Total</div>
+          <div style="font-size:13px;color:var(--text3);margin-top:2px">Comparticipação própria: ${formatEur(budget.own_contribution)}</div>
+        </div>
+        <div class="budget-total-numbers">
+          <div class="budget-total-main">${formatEur(budget.support_amount)}</div>
+          <div class="budget-total-sub">a fundo perdido (${budget.support_rate_applied || opp.support_rate || '—'}) · Total: ${formatEur(budget.total_investment)}</div>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('modalBody').innerHTML = `
+    <!-- Info grid -->
+    <div>
+      <div class="modal-section-title">Informação do Concurso</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-item-label">Programa</div>
+          <div class="info-item-value">${opp.program || '—'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">Entidade</div>
+          <div class="info-item-value">${opp.managing_entity || '—'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">Prazo</div>
+          <div class="info-item-value">${opp.deadline || '—'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">Dotação Total</div>
+          <div class="info-item-value">${opp.total_budget || '—'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">Máx. por Candidatura</div>
+          <div class="info-item-value">${opp.max_per_project || '—'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">Taxa de Apoio</div>
+          <div class="info-item-value highlight">${opp.support_rate || '—'}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Eligibility -->
+    <div>
+      <div class="modal-section-title">Análise de Elegibilidade</div>
+      <div class="text-block">${opp.eligibility_analysis || 'Sem análise disponível.'}</div>
+    </div>
+
+    ${budget ? `
+    <!-- Budget proposal -->
+    <div>
+      <div class="modal-section-title">Proposta Orçamental Detalhada</div>
+      ${budgetHtml}
+    </div>` : ''}
+
+    ${opp.proposal_text ? `
+    <!-- Proposal text -->
+    <div>
+      <div class="modal-section-title">Texto da Proposta de Candidatura</div>
+      <div class="text-block">${opp.proposal_text}</div>
+    </div>` : ''}
+
+    ${steps.length ? `
+    <!-- Next steps -->
+    <div>
+      <div class="modal-section-title">Próximos Passos</div>
+      <ul class="steps-list">
+        ${steps.map((s, i) => `
+          <li>
+            <div class="step-num">${i+1}</div>
+            <span>${s.replace(/^[-•*\d.]+\s*/, '')}</span>
+          </li>`).join('')}
+      </ul>
+    </div>` : ''}
+
+    ${opp.official_link ? `
+    <div>
+      <a href="${opp.official_link}" target="_blank" class="modal-link">
+        🔗 Abrir página oficial do concurso
+      </a>
+    </div>` : ''}
+  `;
+
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function setFilter(type, value, el) {
+  filters[type] = value;
+  // Update chip UI
+  const parent = el.closest('.filter-chips');
+  parent.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  loadOpportunities();
+}
+
+function filterLocal() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  if (!q) { renderOpportunities(allOpportunities); return; }
+  const filtered = allOpportunities.filter(o => 
+    (o.title || '').toLowerCase().includes(q) ||
+    (o.program || '').toLowerCase().includes(q) ||
+    (o.area || '').toLowerCase().includes(q) ||
+    (o.eligibility_analysis || '').toLowerCase().includes(q)
+  );
+  renderOpportunities(filtered);
+}
+
+async function triggerSearch() {
+  const btn = document.getElementById('btnSearch');
+  const spinner = document.getElementById('spinner');
+  const label = document.getElementById('btnLabel');
+  
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  label.textContent = 'A pesquisar...';
+
+  try {
+    await fetch('/api/run-search', { method: 'POST' });
+    // Poll for completion
+    let attempts = 0;
+    const poll = setInterval(async () => {
+      attempts++;
+      await loadStats();
+      await loadOpportunities();
+      if (attempts > 60) { // Max 5 min polling
+        clearInterval(poll);
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        label.textContent = '🔍 Pesquisar Agora';
+      }
+    }, 5000);
+    
+    // Stop after first results or timeout
+    setTimeout(() => {
+      clearInterval(poll);
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      label.textContent = '🔍 Pesquisar Agora';
+    }, 300000);
+    
+  } catch(e) {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    label.textContent = '🔍 Pesquisar Agora';
+  }
+}
+
+// Init
+loadStats();
+loadOpportunities();
+</script>
+
+<!-- CHAT BUTTON -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" title="Consultor IA">💬</button>
+
+<!-- CHAT PANEL -->
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar">🤖</div>
+      <div>
+        <div class="chat-title">Consultor IA</div>
+        <div class="chat-subtitle">Especialista em fundos europeus</div>
+      </div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-msg assistant">
+      <div class="chat-bubble">Olá! Sou o teu consultor especializado em fundos europeus. Conheço o perfil do Glamping Skies e da Sentido da Lua Lda na íntegra.<br><br>Posso ajudar-te com dúvidas sobre elegibilidade, preenchimento de formulários, estratégia de candidatura, ou avaliar se precisas de uma consultora externa para um concurso específico. Em que posso ajudar?</div>
+    </div>
+  </div>
+  <div class="chat-input-row">
+    <textarea class="chat-input" id="chatInput" placeholder="Escreve a tua dúvida..." rows="1" onkeydown="chatKeydown(event)" oninput="autoResize(this)"></textarea>
+    <button class="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<!-- CONSULTANCIES MODAL -->
+<div class="modal-overlay" id="consultModal" onclick="closeConsultModalOnOverlay(event)">
+  <div class="modal" id="consultModalInner">
+    <div class="modal-header">
+      <div class="modal-title">🏢 Consultoras Recomendadas</div>
+      <button class="modal-close" onclick="closeConsultModal()">✕</button>
+    </div>
+    <div class="modal-body" id="consultModalBody">
+      <div class="loading-state">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+        <div>A pesquisar e avaliar consultoras especializadas...</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:8px">Isto pode demorar 20-30 segundos</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* CHAT FAB */
+.chat-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.4);
+  z-index: 150;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-fab:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(201,168,76,0.5); }
+
+/* CHAT PANEL */
+.chat-panel {
+  position: fixed;
+  bottom: 92px;
+  right: 28px;
+  width: 380px;
+  height: 520px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  z-index: 150;
+  box-shadow: 0 16px 64px rgba(0,0,0,0.5);
+  transform: scale(0.9) translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.chat-panel.open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+
+.chat-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.chat-header-info { display: flex; align-items: center; gap: 10px; }
+.chat-avatar {
+  width: 34px; height: 34px;
+  background: var(--gold-glow);
+  border: 1px solid var(--gold-dim);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.chat-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.chat-subtitle { font-size: 10px; color: var(--text3); }
+.chat-close { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 4px; transition: color 0.15s; }
+.chat-close:hover { color: var(--text); }
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+.chat-msg { display: flex; }
+.chat-msg.user { justify-content: flex-end; }
+.chat-msg.assistant { justify-content: flex-start; }
+
+.chat-bubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.chat-msg.user .chat-bubble {
+  background: var(--gold-glow);
+  border: 1px solid var(--gold-dim);
+  color: var(--text);
+  border-radius: 12px 12px 2px 12px;
+}
+.chat-msg.assistant .chat-bubble {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  border-radius: 12px 12px 12px 2px;
+}
+
+.chat-typing {
+  display: flex;
+  gap: 4px;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px 12px 12px 2px;
+  width: fit-content;
+}
+.chat-typing span {
+  width: 6px; height: 6px;
+  background: var(--text3);
+  border-radius: 50%;
+  animation: bounce 1.2s ease infinite;
+}
+.chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+.chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+.chat-input-row {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.chat-input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  resize: none;
+  outline: none;
+  max-height: 120px;
+  overflow-y: auto;
+  line-height: 1.5;
+  transition: border-color 0.15s;
+}
+.chat-input:focus { border-color: var(--gold-dim); }
+.chat-input::placeholder { color: var(--text3); }
+.chat-send {
+  width: 34px; height: 34px;
+  background: var(--gold);
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.chat-send:hover { background: #d4b05a; }
+.chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* CONSULTANCY CARDS */
+.consult-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 12px;
+}
+.consult-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+.consult-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  color: var(--text);
+}
+.consult-score {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--gold);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.consult-location { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+.consult-field { margin-bottom: 8px; }
+.consult-field-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text3);
+  margin-bottom: 3px;
+}
+.consult-field-value { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.consult-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.consult-tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  background: var(--gold-glow);
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  border-radius: 3px;
+  font-weight: 500;
+}
+.consult-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.btn-consult-link {
+  font-size: 11px;
+  color: var(--accent);
+  text-decoration: none;
+  padding: 5px 10px;
+  border: 1px solid rgba(61,127,255,0.3);
+  border-radius: 5px;
+  transition: all 0.15s;
+}
+.btn-consult-link:hover { background: rgba(61,127,255,0.1); }
+.btn-find-consultants {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-find-consultants:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+@media (max-width: 600px) {
+  .chat-panel { width: calc(100vw - 32px); right: 16px; }
+  .chat-fab { right: 16px; bottom: 16px; }
+}
+</style>
+
+<script>
+// ==================== CHAT ====================
+let chatHistory = [];
+let chatOpen = false;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  document.getElementById('chatPanel').classList.toggle('open', chatOpen);
+  if (chatOpen) setTimeout(() => document.getElementById('chatInput').focus(), 300);
+}
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  appendChatMsg('user', text);
+  chatHistory.push({ role: 'user', content: text });
+
+  const typingEl = appendTyping();
+  document.querySelector('.chat-send').disabled = true;
+
+  try {
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatHistory })
+    });
+    const data = await r.json();
+    typingEl.remove();
+    const reply = data.reply || 'Erro ao obter resposta.';
+    appendChatMsg('assistant', reply);
+    chatHistory.push({ role: 'assistant', content: reply });
+  } catch(e) {
+    typingEl.remove();
+    appendChatMsg('assistant', 'Erro de ligação. Tenta novamente.');
+  }
+
+  document.querySelector('.chat-send').disabled = false;
+}
+
+function appendChatMsg(role, text) {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  div.innerHTML = `<div class="chat-bubble">${text.replace(/
+/g, '<br>')}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function appendTyping() {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg assistant';
+  div.innerHTML = `<div class="chat-typing"><span></span><span></span><span></span></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+// ==================== CONSULTANCIES ====================
+let currentConsultOppId = null;
+
+async function openConsultModal(oppId) {
+  currentConsultOppId = oppId;
+  const overlay = document.getElementById('consultModal');
+  const body = document.getElementById('consultModalBody');
+
+  body.innerHTML = `<div class="loading-state">
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+    <div>A pesquisar e avaliar consultoras especializadas...</div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px">Isto pode demorar 20-30 segundos</div>
+  </div>`;
+
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  try {
+    const r = await fetch(`/api/opportunities/${oppId}/consultancies`);
+    const consultancies = await r.json();
+    renderConsultancies(consultancies, body);
+  } catch(e) {
+    body.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>Erro</h3><p>Não foi possível obter recomendações.</p></div>`;
+  }
+}
+
+function renderConsultancies(list, container) {
+  if (!list || !list.length) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">🔍</div>
+      <h3>Sem resultados suficientes</h3>
+      <p>Não foram encontradas consultoras com qualidade verificada suficiente para este concurso. Consulta o chat IA para alternativas.</p>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = list.map((c, i) => `
+    <div class="consult-card">
+      <div class="consult-header">
+        <div>
+          <div class="consult-name">${i+1}. ${c.name || '—'}</div>
+          <div class="consult-location">📍 ${c.location || 'Portugal'}</div>
+        </div>
+        <div class="consult-score">⭐ ${c.screening_score || '—'}/100</div>
+      </div>
+
+      <div class="consult-field">
+        <div class="consult-field-label">Especialização</div>
+        <div class="consult-field-value">${c.specialization || '—'}</div>
+      </div>
+
+      <div class="consult-field">
+        <div class="consult-field-label">Track Record</div>
+        <div class="consult-field-value">${c.track_record || '—'}</div>
+      </div>
+
+      <div class="consult-field">
+        <div class="consult-field-label">Adequação a este concurso</div>
+        <div class="consult-field-value">${c.suitability_for_this_call || '—'}</div>
+      </div>
+
+      ${c.screening_notes ? `<div class="consult-field">
+        <div class="consult-field-label">Notas de screening</div>
+        <div class="consult-field-value">${c.screening_notes}</div>
+      </div>` : ''}
+
+      <div class="consult-tags">
+        ${(c.programs_expertise || []).map(p => `<span class="consult-tag">${p}</span>`).join('')}
+      </div>
+
+      <div class="consult-footer">
+        <div style="font-size:11px;color:var(--text3)">${c.estimated_fee ? '💶 ' + c.estimated_fee : ''}</div>
+        ${c.website ? `<a href="${c.website}" target="_blank" class="btn-consult-link">🔗 Website</a>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function closeConsultModal() {
+  document.getElementById('consultModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeConsultModalOnOverlay(e) {
+  if (e.target === document.getElementById('consultModal')) closeConsultModal();
+}
+
+// Patch openModal to add consultancies button
+const _origOpenModal = openModal;
+openModal = async function(id) {
+  await _origOpenModal(id);
+  // Add consultancies button to modal footer area
+  const body = document.getElementById('modalBody');
+  if (body) {
+    const btnDiv = document.createElement('div');
+    btnDiv.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;';
+    btnDiv.innerHTML = `
+      <button class="btn-find-consultants" onclick="openConsultModal(${id})">
+        🏢 Encontrar Consultoras Especializadas
+      </button>
+      <button class="btn-find-consultants" onclick="askChatAboutOpp(${id})">
+        💬 Perguntar ao Consultor IA
+      </button>
+    `;
+    body.appendChild(btnDiv);
+  }
+};
+
+async function askChatAboutOpp(oppId) {
+  const opp = allOpportunities.find(o => o.id === oppId);
+  if (!opp) return;
+  closeModal();
+  if (!chatOpen) toggleChat();
+  const input = document.getElementById('chatInput');
+  input.value = `Analisa este concurso para mim: "${opp.title}" (${opp.program}). Devo candidatar-me por meios próprios ou preciso de uma consultora especializada?`;
+  autoResize(input);
+  input.focus();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal();
+    closeConsultModal();
+  }
+});
+</script>
+
+</body>
+</html>
