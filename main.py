@@ -96,4 +96,4 @@ async def update_notes(opp_id: int, request: Request):
     body = await request.json()
     notes = body.get("notes", "")
     update_saved_notes(opp_id, notes)
-    return JSONResponse(conten
+    return JSONResponse(content={"status": "ok"})

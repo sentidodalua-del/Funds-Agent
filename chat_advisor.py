@@ -52,4 +52,4 @@ async def chat(messages: list[dict]) -> str:
             }
         )
         data = response.json()
-        return data.get("content", [{}])[0].get("text", "Erro 
+        return data.get("content", [{}])[0].get("text", "Erro ao processar resposta.")
