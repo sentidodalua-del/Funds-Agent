@@ -97,3 +97,52 @@ async def update_notes(opp_id: int, request: Request):
     notes = body.get("notes", "")
     update_saved_notes(opp_id, notes)
     return JSONResponse(content={"status": "ok"})
+
+@app.get("/api/debug")
+async def debug():
+    """Debug endpoint to test API connections."""
+    import os
+    import httpx
+    results = {}
+    
+    # Check env vars
+    pplx_key = os.environ.get("PERPLEXITY_API_KEY", "")
+    ant_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    results["perplexity_key_set"] = bool(pplx_key) and len(pplx_key) > 10
+    results["anthropic_key_set"] = bool(ant_key) and len(ant_key) > 10
+    results["perplexity_key_prefix"] = pplx_key[:8] + "..." if pplx_key else "NOT SET"
+    results["anthropic_key_prefix"] = ant_key[:8] + "..." if ant_key else "NOT SET"
+    
+    # Test Perplexity
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            r = await client.post(
+                "https://api.perplexity.ai/chat/completions",
+                headers={"Authorization": f"Bearer {pplx_key}", "Content-Type": "application/json"},
+                json={"model": "sonar", "messages": [{"role": "user", "content": "test"}]}
+            )
+            results["perplexity_status"] = r.status_code
+            results["perplexity_ok"] = r.status_code == 200
+            if r.status_code != 200:
+                results["perplexity_error"] = r.text[:300]
+    except Exception as e:
+        results["perplexity_ok"] = False
+        results["perplexity_error"] = str(e)
+    
+    # Test Anthropic
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            r = await client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={"x-api-key": ant_key, "anthropic-version": "2023-06-01", "content-type": "application/json"},
+                json={"model": "claude-sonnet-4-20250514", "max_tokens": 10, "messages": [{"role": "user", "content": "hi"}]}
+            )
+            results["anthropic_status"] = r.status_code
+            results["anthropic_ok"] = r.status_code == 200
+            if r.status_code != 200:
+                results["anthropic_error"] = r.text[:300]
+    except Exception as e:
+        results["anthropic_ok"] = False
+        results["anthropic_error"] = str(e)
+    
+    return JSONResponse(content=results)
