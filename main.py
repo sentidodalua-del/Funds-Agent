@@ -77,3 +77,23 @@ async def chat_endpoint(request: Request):
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "timestamp": datetime.now().isoformat()}
+
+from database import toggle_save, get_saved_opportunities, update_saved_notes
+
+@app.post("/api/opportunities/{opp_id}/save")
+async def save_opportunity(opp_id: int, request: Request):
+    body = await request.json()
+    notes = body.get("notes", None)
+    result = toggle_save(opp_id, notes)
+    return JSONResponse(content=result)
+
+@app.get("/api/saved")
+async def list_saved():
+    return JSONResponse(content=get_saved_opportunities())
+
+@app.post("/api/opportunities/{opp_id}/notes")
+async def update_notes(opp_id: int, request: Request):
+    body = await request.json()
+    notes = body.get("notes", "")
+    update_saved_notes(opp_id, notes)
+    return JSONResponse(conten
