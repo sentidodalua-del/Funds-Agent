@@ -1,5 +1,5 @@
 # Configuração das API keys
 # Substitui os valores abaixo pelas tuas keys reais
-
-ANTHROPIC_API_KEY = "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"
+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"
+ANTHROPIC_API_KEY = "
 PERPLEXITY_API_KEY = "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"
