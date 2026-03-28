@@ -174,7 +174,8 @@ Se não encontrares concursos elegíveis, devolve um array vazio: []
 
 async def run_daily_search():
     """Main agent function - runs all searches and saves results."""
-    print(f"[{datetime.now()}] Starting daily EU funds search...")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print("[" + now + "] Starting daily EU funds search...")
     
     if not PERPLEXITY_API_KEY:
         log_search("error", 0, 0, "PERPLEXITY_API_KEY not set")
@@ -230,4 +231,5 @@ async def run_daily_search():
                 new_count += 1
 
     log_search("success", len(all_opportunities), new_count)
-    print(f"[{datetime.now()}] Done. Found {len(all_opportunities)} opportunities, {new_count} new.")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print("[" + now + "] Done. Found " + str(len(all_opportunities)) + " opportunities, " + str(new_count) + " new.")
