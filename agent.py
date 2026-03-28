@@ -230,4 +230,4 @@ async def run_daily_search():
                 new_count += 1
 
     log_search("success", len(all_opportunities), new_count)
-    print(f"[{datetime.now()}] Done. Found {len(all_opportunities)} opportunities, {new_count} new.")
+    print(f"[{datetime.now()}] Done. Fou
