@@ -1,3 +1,13 @@
+try:
+    from config import ANTHROPIC_API_KEY as _ANT_KEY, PERPLEXITY_API_KEY as _PPLX_KEY
+except ImportError:
+    _ANT_KEY = ""
+    _PPLX_KEY = ""
+
+import os
+os.environ.setdefault("ANTHROPIC_API_KEY", _ANT_KEY)
+os.environ.setdefault("PERPLEXITY_API_KEY", _PPLX_KEY)
+
 from fastapi import FastAPI, BackgroundTasks, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
