@@ -37,7 +37,10 @@ def init_db():
             investment_profile TEXT,
             raw_data TEXT,
             found_at TEXT,
-            is_read INTEGER DEFAULT 0
+            is_read INTEGER DEFAULT 0,
+            is_saved INTEGER DEFAULT 0,
+            saved_at TEXT,
+            saved_notes TEXT
         )
     """)
     conn.execute("""
@@ -135,5 +138,35 @@ def log_search(status: str, found: int, new: int, error: str = None):
         "INSERT INTO search_logs (ran_at, status, opportunities_found, opportunities_new, error) VALUES (?,?,?,?,?)",
         (datetime.now().isoformat(), status, found, new, error)
     )
+    conn.commit()
+    conn.close()
+
+def toggle_save(opp_id: int, notes: str = None) -> dict:
+    conn = get_conn()
+    row = conn.execute("SELECT is_saved FROM opportunities WHERE id = ?", (opp_id,)).fetchone()
+    if not row:
+        conn.close()
+        return {"error": "Not found"}
+    new_state = 0 if row["is_saved"] else 1
+    saved_at = datetime.now().isoformat() if new_state else None
+    conn.execute(
+        "UPDATE opportunities SET is_saved = ?, saved_at = ?, saved_notes = ? WHERE id = ?",
+        (new_state, saved_at, notes, opp_id)
+    )
+    conn.commit()
+    conn.close()
+    return {"is_saved": bool(new_state), "saved_at": saved_at}
+
+def get_saved_opportunities():
+    conn = get_conn()
+    rows = conn.execute(
+        "SELECT * FROM opportunities WHERE is_saved = 1 ORDER BY saved_at DESC"
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def update_saved_notes(opp_id: int, notes: str):
+    conn = get_conn()
+    conn.execute("UPDATE opportunities SET saved_notes = ? WHERE id = ?", (notes, opp_id))
     conn.commit()
     conn.close()
